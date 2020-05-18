@@ -14,6 +14,7 @@ namespace FinalProject
 {
     public partial class LoginForm : Form
     {
+        Customer cust;
         public LoginForm()
         {
             InitializeComponent();
@@ -35,9 +36,10 @@ namespace FinalProject
             var rs = command.ExecuteReader();
             while (rs.Read())
             {
+                cust = new Customer(Convert.ToInt32(rs["Id"]));
                 if (rs["Pswrd"].ToString().Trim().Equals(password))
                 {
-                    CustomerForm cf = new CustomerForm(this);
+                    CustomerForm cf = new CustomerForm(this, cust);
                     this.Hide();
                     cf.ShowDialog();
                     this.Close();

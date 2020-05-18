@@ -37,6 +37,14 @@
             this.BalanceLabel = new System.Windows.Forms.Label();
             this.PaymentText = new System.Windows.Forms.MaskedTextBox();
             this.PaymentButton = new System.Windows.Forms.Button();
+            this.SelectItemLabel = new System.Windows.Forms.Label();
+            this.SelectItemQty = new System.Windows.Forms.NumericUpDown();
+            this.CartButton = new System.Windows.Forms.Button();
+            this.CheckoutButton = new System.Windows.Forms.Button();
+            this.CheckoutList = new System.Windows.Forms.ListBox();
+            this.PlaceOrderButton = new System.Windows.Forms.Button();
+            this.OrderPlacedLabel = new System.Windows.Forms.Label();
+            ((System.ComponentModel.ISupportInitialize)(this.SelectItemQty)).BeginInit();
             this.SuspendLayout();
             // 
             // InventoryButton
@@ -92,6 +100,7 @@
             this.InventoryList.Size = new System.Drawing.Size(254, 147);
             this.InventoryList.TabIndex = 4;
             this.InventoryList.Visible = false;
+            this.InventoryList.SelectedValueChanged += new System.EventHandler(this.InventoryList_SelectedValueChanged);
             // 
             // LogoutButton
             // 
@@ -135,11 +144,93 @@
             this.PaymentButton.Visible = false;
             this.PaymentButton.Click += new System.EventHandler(this.PaymentButton_Click);
             // 
+            // SelectItemLabel
+            // 
+            this.SelectItemLabel.AutoSize = true;
+            this.SelectItemLabel.Font = new System.Drawing.Font("Bahnschrift", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.SelectItemLabel.Location = new System.Drawing.Point(306, 20);
+            this.SelectItemLabel.Name = "SelectItemLabel";
+            this.SelectItemLabel.Size = new System.Drawing.Size(173, 16);
+            this.SelectItemLabel.TabIndex = 9;
+            this.SelectItemLabel.Text = "Select an Item to add to Cart:";
+            this.SelectItemLabel.Visible = false;
+            // 
+            // SelectItemQty
+            // 
+            this.SelectItemQty.Location = new System.Drawing.Point(557, 89);
+            this.SelectItemQty.Name = "SelectItemQty";
+            this.SelectItemQty.Size = new System.Drawing.Size(63, 20);
+            this.SelectItemQty.TabIndex = 10;
+            this.SelectItemQty.Visible = false;
+            // 
+            // CartButton
+            // 
+            this.CartButton.Font = new System.Drawing.Font("Bahnschrift", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.CartButton.Location = new System.Drawing.Point(548, 115);
+            this.CartButton.Name = "CartButton";
+            this.CartButton.Size = new System.Drawing.Size(72, 40);
+            this.CartButton.TabIndex = 11;
+            this.CartButton.Text = "Add to Cart";
+            this.CartButton.UseVisualStyleBackColor = true;
+            this.CartButton.Visible = false;
+            this.CartButton.Click += new System.EventHandler(this.CartButton_Click);
+            // 
+            // CheckoutButton
+            // 
+            this.CheckoutButton.Font = new System.Drawing.Font("Bahnschrift", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.CheckoutButton.Location = new System.Drawing.Point(548, 158);
+            this.CheckoutButton.Name = "CheckoutButton";
+            this.CheckoutButton.Size = new System.Drawing.Size(72, 29);
+            this.CheckoutButton.TabIndex = 12;
+            this.CheckoutButton.Text = "Checkout";
+            this.CheckoutButton.UseVisualStyleBackColor = true;
+            this.CheckoutButton.Visible = false;
+            this.CheckoutButton.Click += new System.EventHandler(this.CheckoutButton_Click);
+            // 
+            // CheckoutList
+            // 
+            this.CheckoutList.FormattingEnabled = true;
+            this.CheckoutList.Location = new System.Drawing.Point(257, 39);
+            this.CheckoutList.Name = "CheckoutList";
+            this.CheckoutList.Size = new System.Drawing.Size(259, 147);
+            this.CheckoutList.TabIndex = 13;
+            this.CheckoutList.Visible = false;
+            // 
+            // PlaceOrderButton
+            // 
+            this.PlaceOrderButton.Font = new System.Drawing.Font("Bahnschrift", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.PlaceOrderButton.Location = new System.Drawing.Point(337, 192);
+            this.PlaceOrderButton.Name = "PlaceOrderButton";
+            this.PlaceOrderButton.Size = new System.Drawing.Size(142, 29);
+            this.PlaceOrderButton.TabIndex = 14;
+            this.PlaceOrderButton.Text = "PLACE ORDER";
+            this.PlaceOrderButton.UseVisualStyleBackColor = true;
+            this.PlaceOrderButton.Visible = false;
+            this.PlaceOrderButton.Click += new System.EventHandler(this.PlaceOrderButton_Click);
+            // 
+            // OrderPlacedLabel
+            // 
+            this.OrderPlacedLabel.AutoSize = true;
+            this.OrderPlacedLabel.Font = new System.Drawing.Font("Bahnschrift", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.OrderPlacedLabel.Location = new System.Drawing.Point(291, 198);
+            this.OrderPlacedLabel.Name = "OrderPlacedLabel";
+            this.OrderPlacedLabel.Size = new System.Drawing.Size(233, 16);
+            this.OrderPlacedLabel.TabIndex = 15;
+            this.OrderPlacedLabel.Text = "Thank You! Your order has been placed.";
+            this.OrderPlacedLabel.Visible = false;
+            // 
             // CustomerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.OrderPlacedLabel);
+            this.Controls.Add(this.PlaceOrderButton);
+            this.Controls.Add(this.CheckoutList);
+            this.Controls.Add(this.CheckoutButton);
+            this.Controls.Add(this.CartButton);
+            this.Controls.Add(this.SelectItemQty);
+            this.Controls.Add(this.SelectItemLabel);
             this.Controls.Add(this.PaymentButton);
             this.Controls.Add(this.PaymentText);
             this.Controls.Add(this.BalanceLabel);
@@ -151,6 +242,7 @@
             this.Controls.Add(this.InventoryButton);
             this.Name = "CustomerForm";
             this.Text = "Customer Dashboard";
+            ((System.ComponentModel.ISupportInitialize)(this.SelectItemQty)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -167,5 +259,12 @@
         public System.Windows.Forms.Label BalanceLabel;
         private System.Windows.Forms.MaskedTextBox PaymentText;
         private System.Windows.Forms.Button PaymentButton;
+        private System.Windows.Forms.Label SelectItemLabel;
+        private System.Windows.Forms.NumericUpDown SelectItemQty;
+        private System.Windows.Forms.Button CartButton;
+        private System.Windows.Forms.Button CheckoutButton;
+        private System.Windows.Forms.ListBox CheckoutList;
+        private System.Windows.Forms.Button PlaceOrderButton;
+        private System.Windows.Forms.Label OrderPlacedLabel;
     }
 }

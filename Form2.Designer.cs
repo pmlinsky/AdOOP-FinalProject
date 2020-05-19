@@ -44,6 +44,10 @@
             this.CheckoutList = new System.Windows.Forms.ListBox();
             this.PlaceOrderButton = new System.Windows.Forms.Button();
             this.OrderPlacedLabel = new System.Windows.Forms.Label();
+            this.SearchByDateCalendar = new System.Windows.Forms.MonthCalendar();
+            this.ViewAllPurchasesButton = new System.Windows.Forms.Button();
+            this.PriceRangeText = new System.Windows.Forms.TextBox();
+            this.PurchasesList = new System.Windows.Forms.ListBox();
             ((System.ComponentModel.ISupportInitialize)(this.SelectItemQty)).BeginInit();
             this.SuspendLayout();
             // 
@@ -219,11 +223,53 @@
             this.OrderPlacedLabel.Text = "Thank You! Your order has been placed.";
             this.OrderPlacedLabel.Visible = false;
             // 
+            // SearchByDateCalendar
+            // 
+            this.SearchByDateCalendar.Location = new System.Drawing.Point(370, 79);
+            this.SearchByDateCalendar.MaxDate = new System.DateTime(2020, 5, 18, 0, 0, 0, 0);
+            this.SearchByDateCalendar.Name = "SearchByDateCalendar";
+            this.SearchByDateCalendar.TabIndex = 16;
+            this.SearchByDateCalendar.Visible = false;
+            this.SearchByDateCalendar.DateSelected += new System.Windows.Forms.DateRangeEventHandler(this.SearchByDateCalendar_DateSelected);
+            // 
+            // ViewAllPurchasesButton
+            // 
+            this.ViewAllPurchasesButton.Font = new System.Drawing.Font("Bahnschrift", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.ViewAllPurchasesButton.Location = new System.Drawing.Point(238, 92);
+            this.ViewAllPurchasesButton.Name = "ViewAllPurchasesButton";
+            this.ViewAllPurchasesButton.Size = new System.Drawing.Size(120, 86);
+            this.ViewAllPurchasesButton.TabIndex = 17;
+            this.ViewAllPurchasesButton.Text = "View All Purchases";
+            this.ViewAllPurchasesButton.UseVisualStyleBackColor = true;
+            this.ViewAllPurchasesButton.Visible = false;
+            this.ViewAllPurchasesButton.Click += new System.EventHandler(this.ViewAllPurchasesButton_Click);
+            // 
+            // PriceRangeText
+            // 
+            this.PriceRangeText.Location = new System.Drawing.Point(238, 195);
+            this.PriceRangeText.Name = "PriceRangeText";
+            this.PriceRangeText.Size = new System.Drawing.Size(120, 20);
+            this.PriceRangeText.TabIndex = 18;
+            this.PriceRangeText.Visible = false;
+            // 
+            // PurchasesList
+            // 
+            this.PurchasesList.FormattingEnabled = true;
+            this.PurchasesList.Location = new System.Drawing.Point(300, 79);
+            this.PurchasesList.Name = "PurchasesList";
+            this.PurchasesList.Size = new System.Drawing.Size(331, 160);
+            this.PurchasesList.TabIndex = 19;
+            this.PurchasesList.Visible = false;
+            // 
             // CustomerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.PurchasesList);
+            this.Controls.Add(this.PriceRangeText);
+            this.Controls.Add(this.ViewAllPurchasesButton);
+            this.Controls.Add(this.SearchByDateCalendar);
             this.Controls.Add(this.OrderPlacedLabel);
             this.Controls.Add(this.PlaceOrderButton);
             this.Controls.Add(this.CheckoutList);
@@ -266,5 +312,9 @@
         private System.Windows.Forms.ListBox CheckoutList;
         private System.Windows.Forms.Button PlaceOrderButton;
         private System.Windows.Forms.Label OrderPlacedLabel;
+        private System.Windows.Forms.MonthCalendar SearchByDateCalendar;
+        private System.Windows.Forms.Button ViewAllPurchasesButton;
+        private System.Windows.Forms.TextBox PriceRangeText;
+        private System.Windows.Forms.ListBox PurchasesList;
     }
 }

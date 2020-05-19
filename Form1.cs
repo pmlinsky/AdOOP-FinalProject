@@ -14,10 +14,11 @@ namespace FinalProject
 {
     public partial class LoginForm : Form
     {
-        Customer cust;
+        SalesTrackerDBDataContext db;
         public LoginForm()
         {
             InitializeComponent();
+            db = new SalesTrackerDBDataContext();
         }
 
         private void LoginButton_Click(object sender, EventArgs e)
@@ -25,25 +26,17 @@ namespace FinalProject
             string username = UsernameText.Text;
             string password = PasswordText.Text;
 
-            string conn_string = @"Driver={SQL Server};
-                                    Server=DESKTOP-FGFE61N\SQLEXPRESS01;
-                                    Database=SALES_TRACKER";
-            OdbcConnection conn = new OdbcConnection(conn_string);
-            conn.Open();
-
-            var command = conn.CreateCommand();
-            command.CommandText = "SELECT * FROM CUSTOMER WHERE USERNAME= '" + username+"'";
-            var rs = command.ExecuteReader();
-            while (rs.Read())
+            var cust = db.CUSTOMERs.Where(c => c.Username.Equals(username)).FirstOrDefault();
+            if (cust == null)
             {
-                cust = new Customer(Convert.ToInt32(rs["Id"]));
-                if (rs["Pswrd"].ToString().Trim().Equals(password))
-                {
-                    CustomerForm cf = new CustomerForm(this, cust);
-                    this.Hide();
-                    cf.ShowDialog();
-                    this.Close();
-                }
+                ValidateInfo.SetError(LoginButton, "Invalid Username or Password");
+            }
+            else if (cust.Pswrd.Trim().Equals(password))
+            {
+                CustomerForm cf = new CustomerForm(this, db);
+                this.Hide();
+                cf.ShowDialog();
+                this.Close();
             }
             ValidateInfo.SetError(LoginButton, "Invalid Username or Password");
         }

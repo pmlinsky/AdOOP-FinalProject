@@ -15,24 +15,16 @@ namespace FinalProject
 {
     public partial class CustomerForm : Form
     {
-        Customer cust;
-
-        static string conn_string = @"Driver={SQL Server};
-                                    Server=DESKTOP-FGFE61N\SQLEXPRESS01;
-                                    Database=SALES_TRACKER;
-                                    MultipleActiveResultSets=true";
-        OdbcConnection conn = new OdbcConnection(conn_string);
-
         List<int> qtyInStock = new List<int>();
         List<string> items = new List<string>();
 
         LoginForm lf;
-        public CustomerForm(LoginForm lf, Customer cust)
+        SalesTrackerDBDataContext db;
+        public CustomerForm(LoginForm lf, SalesTrackerDBDataContext db)
         {
             InitializeComponent();
             this.lf = lf;
-            this.cust = cust;
-            conn.Open();
+            this.db = db;
         }
 
         private void InventoryButton_Click(object sender, EventArgs e)
@@ -43,20 +35,19 @@ namespace FinalProject
         private void InventoryButton_Click()
         {
             ClearCurrent();
-            if (InventoryList.Items.Count == 0) { 
-                var command = conn.CreateCommand();
-                command.CommandText = "SELECT * FROM INVENTORY ORDER BY ItemName";
-                var rs = command.ExecuteReader();
 
-                while (rs.Read())
+            if (InventoryList.Items.Count == 0) 
+            {
+                var items = db.INVENTORies.OrderBy(i => i.ItemName);
+                foreach (var item in items)
                 {
-                    if (!rs["QtyInStock"].ToString().Trim().Equals("0"))
+                    if (item.QtyInStock != 0)
                     {
-                        InventoryList.Items.Add(rs["ItemName"].ToString().Trim() +
-                            "\t$" + rs["Price"]);
-                        qtyInStock.Add(Convert.ToInt32(rs["QtyInStock"]));
+                        InventoryList.Items.Add(item.ItemName +
+                            "\t$" + item.Price);
+                        qtyInStock.Add(Convert.ToInt32(item.QtyInStock));
                     }
-                }
+                }                
             }
             InventoryList.Visible = true;
         }
@@ -64,27 +55,22 @@ namespace FinalProject
         private void PurchaseButton_Click(object sender, EventArgs e)
         {
             ClearCurrent();
-            var command = conn.CreateCommand();
-            command.CommandText = "SELECT BALANCE FROM CUSTOMER WHERE USERNAME= '" 
-                + lf.UsernameText.Text + "'";
-            var rs = command.ExecuteReader();
-            while (rs.Read())
-            {
-                if (Convert.ToInt32(rs["Balance"]) >= 1000)
-                {
-                    BalanceLabel.Text = "Your current balance is: $" + rs["Balance"].ToString() +
-                      "\nYou cannot make a purchase until your balance is less than $1000.";
-                    BalanceLabel.Visible = true;
-                }
-                else
-                {
-                    InventoryButton_Click();
 
-                    SelectItemLabel.Visible = true;
-                    SelectItemQty.Visible = true;
-                    CartButton.Visible = true;
-                }
-            }           
+            var cust = db.CUSTOMERs.Where(c => c.Username.Equals(lf.UsernameText.Text)).First();
+            if (cust.Balance >= 1000)
+            {
+                BalanceLabel.Text = "Your current balance is: $" + cust.Balance +
+                    "\nYou cannot make a purchase until your balance is less than $1000.";
+                BalanceLabel.Visible = true;
+            }
+            else
+            {
+                InventoryButton_Click();
+
+                SelectItemLabel.Visible = true;
+                SelectItemQty.Visible = true;
+                CartButton.Visible = true;
+            }         
         }
 
         private void InventoryList_SelectedValueChanged(object sender, EventArgs e)
@@ -97,10 +83,13 @@ namespace FinalProject
         private void CartButton_Click(object sender, EventArgs e)
         {
             decimal qty = SelectItemQty.Value;
-            items.Add(qty.ToString());
-            int index = InventoryList.SelectedItem.ToString().IndexOf("$");
-            items.Add(InventoryList.SelectedItem.ToString().Substring(0, index).Trim());
-            CheckoutButton.Visible = true;
+            if (qty > 0) 
+            { 
+                items.Add(qty.ToString());
+                int index = InventoryList.SelectedItem.ToString().IndexOf("$");
+                items.Add(InventoryList.SelectedItem.ToString().Substring(0, index).Trim());
+                CheckoutButton.Visible = true;
+            }
         }
 
         private void CheckoutButton_Click(object sender, EventArgs e)
@@ -125,38 +114,25 @@ namespace FinalProject
             ClearCurrent();
             OrderPlacedLabel.Visible = true;
 
-            var command = conn.CreateCommand();
-            var c2 = conn.CreateCommand();
-            decimal price = 0;
+            decimal totalPrice = 0;
+            decimal linePrice = 0;
+            var cust = db.CUSTOMERs.Where(c => c.Username.Equals(lf.UsernameText.Text)).First();
+
             for (int i = 0; i < items.Count; i += 2)
             {
                 int qty = Convert.ToInt32(items.ElementAt(i));
                 string item = items.ElementAt(i + 1);
-                foreach (String s in items)
-                {
-                    Console.WriteLine(s);
-                }
 
-                c2.CommandText = "INSERT INTO PURCHASES (CustID, ItemName, Qty) VALUES (" +
-                    cust.Id + ", '" + item + "', " + qty + ")";
-                c2.ExecuteNonQuery();
+                var it = db.INVENTORies.Where(p => p.ItemName.Equals(item)).First();
+                it.QtyInStock -= qty;
+                linePrice += it.Price * qty;
+                totalPrice += linePrice;
 
-                command.CommandText = "UPDATE INVENTORY SET QtyInStock -= "+ qty +
-                    " WHERE ItemName = '" + item + "'";
-                command.ExecuteNonQuery();
-
-                command.CommandText = "SELECT PRICE FROM INVENTORY " +
-                    "WHERE ItemName = '" + item + "'";
-                var rs = command.ExecuteReader();
-                while (rs.Read())
-                {
-                    price += Convert.ToDecimal(rs["Price"]) * qty;
-                }
+                cust.PURCHASEs.Add(new PURCHASE
+                { CustID = cust.Id, ItemName = item, Qty = qty, Price = linePrice });
             }
-
-            c2.CommandText = "UPDATE CUSTOMER SET Balance += " + price +
-                "WHERE USERNAME= '" + lf.UsernameText.Text + "'";
-            c2.ExecuteNonQuery();
+            cust.Balance += totalPrice;
+            db.SubmitChanges();
 
             for (int i = items.Count - 1; i >= 0; i--)
             {
@@ -173,14 +149,11 @@ namespace FinalProject
         private void BalanceButton_Click(object sender, EventArgs e)
         {
             ClearCurrent();
-            var command = conn.CreateCommand();
-            command.CommandText = "SELECT BALANCE FROM CUSTOMER WHERE USERNAME= '" + lf.UsernameText.Text + "'";
-            var rs = command.ExecuteReader();
-            while (rs.Read())
-            {
-                BalanceLabel.Text = "Your current balance is: $"+rs["Balance"].ToString() +
-                    "\nEnter payment amount below:";
-            }
+
+            var cust = db.CUSTOMERs.Where(c => c.Username.Equals(lf.UsernameText.Text)).First();
+            BalanceLabel.Text = "Your current balance is: $"+ cust.Balance +
+                "\nEnter payment amount below:";
+
             BalanceLabel.Visible = true;
             PaymentText.Visible = true;
             PaymentButton.Visible = true;
@@ -197,17 +170,13 @@ namespace FinalProject
                 if (Convert.ToDouble(amount) > 0)
                 {
                     double payment = Convert.ToDouble(amount);
-                    var command = conn.CreateCommand();
-                    command.CommandText = "UPDATE CUSTOMER SET BALANCE -= '" + payment +
-                        "'WHERE USERNAME= '" + lf.UsernameText.Text + "'";
-                    command.ExecuteNonQuery();
-                    command.CommandText = "SELECT BALANCE FROM CUSTOMER WHERE USERNAME= '" + lf.UsernameText.Text + "'";
-                    var rs = command.ExecuteReader();
-                    while (rs.Read())
-                    {
-                        BalanceLabel.Text = "Thank you for your payment! Your current balance is: $" +
-                            rs["Balance"];
-                    }
+                    var cust = db.CUSTOMERs.Where
+                        (c => c.Username.Equals(lf.UsernameText.Text)).First();
+                    cust.Balance -= Convert.ToDecimal(amount);
+
+                    db.SubmitChanges();
+                    BalanceLabel.Text = "Thank you for your payment! Your current balance is: " +
+                         "$" + cust.Balance;
                 }
                 else
                 {
@@ -225,6 +194,33 @@ namespace FinalProject
         private void ViewPurchasesButton_Click(object sender, EventArgs e)
         {
             ClearCurrent();
+            ViewAllPurchasesButton.Visible = true;
+            SearchByDateCalendar.Visible = true;
+            PriceRangeText.Visible = true;
+        }
+
+
+        private void ViewAllPurchasesButton_Click(object sender, EventArgs e)
+        {
+            ClearCurrent();
+
+            var cust = db.CUSTOMERs.Where(c => c.Username.Equals(lf.UsernameText.Text)).First();
+
+            var purchases = cust.PURCHASEs.Select(c => c);
+            foreach (var p in purchases)
+            {
+                PurchasesList.Items.Add(p.DateOfPurchase + "\t" +
+                p.ItemName + "\t" +
+                p.Qty + "\t$" +
+                p.Price);
+            }
+            
+            PurchasesList.Visible = true;
+        }
+
+        private void SearchByDateCalendar_DateSelected(object sender, DateRangeEventArgs e)
+        {
+
         }
 
         private void LogoutButton_Click(object sender, EventArgs e)
@@ -248,6 +244,12 @@ namespace FinalProject
             SelectItemQty.Visible = false;
             SelectItemLabel.Visible = false;
             OrderPlacedLabel.Visible = false;
+            ViewAllPurchasesButton.Visible = false;
+            SearchByDateCalendar.Visible = false;
+            PurchasesList.Visible = false;
+            PriceRangeText.Visible = false;
         }
+
+
     }
 }

@@ -107,6 +107,8 @@ namespace FinalProject
             CheckoutList.Visible = true;
             PlaceOrderButton.Visible = true;
             SelectItemLabel.Visible = false;
+            CartButton.Visible = false;
+            SelectItemQty.Visible = false;
         }
 
         private void PlaceOrderButton_Click(object sender, EventArgs e)
@@ -128,8 +130,10 @@ namespace FinalProject
                 linePrice += it.Price * qty;
                 totalPrice += linePrice;
 
+                DateTime today = DateTime.Today;
                 cust.PURCHASEs.Add(new PURCHASE
-                { CustID = cust.Id, ItemName = item, Qty = qty, Price = linePrice });
+                { DateOfPurchase = today, CustID = cust.Id, 
+                    ItemName = item, Qty = qty, Price = linePrice });
             }
             cust.Balance += totalPrice;
             db.SubmitChanges();
@@ -195,8 +199,8 @@ namespace FinalProject
         {
             ClearCurrent();
             ViewAllPurchasesButton.Visible = true;
-            SearchByDateCalendar.Visible = true;
-            PriceRangeText.Visible = true;
+            ViewByPriceButton.Visible = true;
+            ViewByDateButton.Visible = true;
         }
 
 
@@ -209,18 +213,87 @@ namespace FinalProject
             var purchases = cust.PURCHASEs.Select(c => c);
             foreach (var p in purchases)
             {
-                PurchasesList.Items.Add(p.DateOfPurchase + "\t" +
-                p.ItemName + "\t" +
-                p.Qty + "\t$" +
-                p.Price);
+                PurchasesList.Items.Add(p.DateOfPurchase.ToShortDateString() + "\t" +
+                p.ItemName + "\t" + p.Qty + "\t$" + p.Price);
             }
             
             PurchasesList.Visible = true;
         }
 
-        private void SearchByDateCalendar_DateSelected(object sender, DateRangeEventArgs e)
-        {
 
+        private void ViewByPriceButton_Click(object sender, EventArgs e)
+        {
+            ClearCurrent();
+
+            PriceFromBox.Visible = true;
+            PriceToBox.Visible = true;
+            SubmitSearchButton.Visible = true;
+        }
+
+        private void ViewByDateButton_Click(object sender, EventArgs e)
+        {
+            ClearCurrent();
+
+            SearchByDateCalendar.MaxDate = DateTime.Today;
+            SearchByDateCalendar.Visible = true;
+            SubmitSearchButton.Visible = true;
+        }
+
+        private void SubmitSearchButton_Click(object sender, EventArgs e)
+        {
+            ClearCurrent();
+
+            DateTime start, end;
+            decimal low = 0, high = decimal.MaxValue;
+            if (SearchByDateCalendar.Visible)
+            {
+                start = SearchByDateCalendar.SelectionRange.Start;
+                end = SearchByDateCalendar.SelectionRange.End;
+            }
+            else
+            {
+                string lowS = PriceFromBox.Text.Trim();
+                string highS = PriceToBox.Text.Trim();
+                string pattern = @"\d+(\.\d{1-2})?";
+                Regex rg = new Regex(pattern);
+                if (rg.IsMatch(lowS) && rg.IsMatch(highS))
+                {
+                    if (Convert.ToDecimal(lowS) > 0 &&
+                        Convert.ToDecimal(highS) >= Convert.ToDecimal(lowS))
+                    {
+                        low = Convert.ToDecimal(PriceFromBox.Text);
+                        high = Convert.ToDecimal(PriceToBox.Text);
+                    }
+                    else
+                    {
+                        InvalidPriceBox.Text = "Invalid input. Displaying all purchases.";
+                        InvalidPriceBox.Visible = true;
+                    }
+                }
+                else
+                {
+                    InvalidPriceBox.Text = "Invalid input. Displaying all purchases.";
+                    InvalidPriceBox.Visible = true;
+                }
+                start = new DateTime(1800, 01, 01);
+                end = DateTime.Today;
+                
+                PriceFromBox.Text = "Enter Lowest Price Here";
+                PriceToBox.Text = "Enter Highest Price Here";
+            }
+
+            var cust = db.CUSTOMERs.Where(c => c.Username.Equals(lf.UsernameText.Text)).First();
+
+            var purchases = cust.PURCHASEs.Where(
+                c => c.DateOfPurchase >= start && c.DateOfPurchase <= end &&
+                c.Price >= low && c.Price <= high);
+            foreach (var p in purchases)
+            {
+                PurchasesList.Items.Add(p.DateOfPurchase.ToShortDateString() + "\t" +
+                p.ItemName + "\t" + p.Qty + "\t$" + p.Price);
+            }
+
+            PurchasesList.Visible = true;
         }
 
         private void LogoutButton_Click(object sender, EventArgs e)
@@ -247,7 +320,13 @@ namespace FinalProject
             ViewAllPurchasesButton.Visible = false;
             SearchByDateCalendar.Visible = false;
             PurchasesList.Visible = false;
-            PriceRangeText.Visible = false;
+            ViewByDateButton.Visible = false;
+            ViewByPriceButton.Visible = false;
+            SubmitSearchButton.Visible = false;
+            PriceFromBox.Visible = false;
+            PriceToBox.Visible = false;
+            InvalidPriceBox.Visible = false;
+            PurchasesList.Items.Clear();
         }
 
 

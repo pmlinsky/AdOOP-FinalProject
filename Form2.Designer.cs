@@ -46,8 +46,13 @@
             this.OrderPlacedLabel = new System.Windows.Forms.Label();
             this.SearchByDateCalendar = new System.Windows.Forms.MonthCalendar();
             this.ViewAllPurchasesButton = new System.Windows.Forms.Button();
-            this.PriceRangeText = new System.Windows.Forms.TextBox();
             this.PurchasesList = new System.Windows.Forms.ListBox();
+            this.ViewByPriceButton = new System.Windows.Forms.Button();
+            this.ViewByDateButton = new System.Windows.Forms.Button();
+            this.SubmitSearchButton = new System.Windows.Forms.Button();
+            this.PriceFromBox = new System.Windows.Forms.TextBox();
+            this.PriceToBox = new System.Windows.Forms.TextBox();
+            this.InvalidPriceBox = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.SelectItemQty)).BeginInit();
             this.SuspendLayout();
             // 
@@ -225,17 +230,17 @@
             // 
             // SearchByDateCalendar
             // 
-            this.SearchByDateCalendar.Location = new System.Drawing.Point(370, 79);
-            this.SearchByDateCalendar.MaxDate = new System.DateTime(2020, 5, 18, 0, 0, 0, 0);
+            this.SearchByDateCalendar.Location = new System.Drawing.Point(318, 79);
+            this.SearchByDateCalendar.MaxDate = new System.DateTime(2020, 5, 19, 0, 0, 0, 0);
+            this.SearchByDateCalendar.MaxSelectionCount = 36500;
             this.SearchByDateCalendar.Name = "SearchByDateCalendar";
             this.SearchByDateCalendar.TabIndex = 16;
             this.SearchByDateCalendar.Visible = false;
-            this.SearchByDateCalendar.DateSelected += new System.Windows.Forms.DateRangeEventHandler(this.SearchByDateCalendar_DateSelected);
             // 
             // ViewAllPurchasesButton
             // 
             this.ViewAllPurchasesButton.Font = new System.Drawing.Font("Bahnschrift", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ViewAllPurchasesButton.Location = new System.Drawing.Point(238, 92);
+            this.ViewAllPurchasesButton.Location = new System.Drawing.Point(233, 89);
             this.ViewAllPurchasesButton.Name = "ViewAllPurchasesButton";
             this.ViewAllPurchasesButton.Size = new System.Drawing.Size(120, 86);
             this.ViewAllPurchasesButton.TabIndex = 17;
@@ -244,30 +249,91 @@
             this.ViewAllPurchasesButton.Visible = false;
             this.ViewAllPurchasesButton.Click += new System.EventHandler(this.ViewAllPurchasesButton_Click);
             // 
-            // PriceRangeText
-            // 
-            this.PriceRangeText.Location = new System.Drawing.Point(238, 195);
-            this.PriceRangeText.Name = "PriceRangeText";
-            this.PriceRangeText.Size = new System.Drawing.Size(120, 20);
-            this.PriceRangeText.TabIndex = 18;
-            this.PriceRangeText.Visible = false;
-            // 
             // PurchasesList
             // 
             this.PurchasesList.FormattingEnabled = true;
-            this.PurchasesList.Location = new System.Drawing.Point(300, 79);
+            this.PurchasesList.Location = new System.Drawing.Point(309, 61);
             this.PurchasesList.Name = "PurchasesList";
             this.PurchasesList.Size = new System.Drawing.Size(331, 160);
             this.PurchasesList.TabIndex = 19;
             this.PurchasesList.Visible = false;
+            // 
+            // ViewByPriceButton
+            // 
+            this.ViewByPriceButton.Font = new System.Drawing.Font("Bahnschrift", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.ViewByPriceButton.Location = new System.Drawing.Point(485, 89);
+            this.ViewByPriceButton.Name = "ViewByPriceButton";
+            this.ViewByPriceButton.Size = new System.Drawing.Size(120, 86);
+            this.ViewByPriceButton.TabIndex = 20;
+            this.ViewByPriceButton.Text = "View Purchases in a Price Range";
+            this.ViewByPriceButton.UseVisualStyleBackColor = true;
+            this.ViewByPriceButton.Visible = false;
+            this.ViewByPriceButton.Click += new System.EventHandler(this.ViewByPriceButton_Click);
+            // 
+            // ViewByDateButton
+            // 
+            this.ViewByDateButton.Font = new System.Drawing.Font("Bahnschrift", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.ViewByDateButton.Location = new System.Drawing.Point(359, 89);
+            this.ViewByDateButton.Name = "ViewByDateButton";
+            this.ViewByDateButton.Size = new System.Drawing.Size(120, 86);
+            this.ViewByDateButton.TabIndex = 21;
+            this.ViewByDateButton.Text = "View Purchases in a Date Range";
+            this.ViewByDateButton.UseVisualStyleBackColor = true;
+            this.ViewByDateButton.Visible = false;
+            this.ViewByDateButton.Click += new System.EventHandler(this.ViewByDateButton_Click);
+            // 
+            // SubmitSearchButton
+            // 
+            this.SubmitSearchButton.Font = new System.Drawing.Font("Bahnschrift", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.SubmitSearchButton.Location = new System.Drawing.Point(390, 253);
+            this.SubmitSearchButton.Name = "SubmitSearchButton";
+            this.SubmitSearchButton.Size = new System.Drawing.Size(71, 40);
+            this.SubmitSearchButton.TabIndex = 22;
+            this.SubmitSearchButton.Text = "SEARCH";
+            this.SubmitSearchButton.UseVisualStyleBackColor = true;
+            this.SubmitSearchButton.Visible = false;
+            this.SubmitSearchButton.Click += new System.EventHandler(this.SubmitSearchButton_Click);
+            // 
+            // PriceFromBox
+            // 
+            this.PriceFromBox.Location = new System.Drawing.Point(343, 139);
+            this.PriceFromBox.Name = "PriceFromBox";
+            this.PriceFromBox.Size = new System.Drawing.Size(163, 20);
+            this.PriceFromBox.TabIndex = 23;
+            this.PriceFromBox.Text = "Enter Lowest Price Here";
+            this.PriceFromBox.Visible = false;
+            // 
+            // PriceToBox
+            // 
+            this.PriceToBox.Location = new System.Drawing.Point(343, 175);
+            this.PriceToBox.Name = "PriceToBox";
+            this.PriceToBox.Size = new System.Drawing.Size(163, 20);
+            this.PriceToBox.TabIndex = 24;
+            this.PriceToBox.Text = "Enter Highest Price Here";
+            this.PriceToBox.Visible = false;
+            // 
+            // InvalidPriceBox
+            // 
+            this.InvalidPriceBox.AutoSize = true;
+            this.InvalidPriceBox.Font = new System.Drawing.Font("Bahnschrift", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.InvalidPriceBox.Location = new System.Drawing.Point(393, 240);
+            this.InvalidPriceBox.Name = "InvalidPriceBox";
+            this.InvalidPriceBox.Size = new System.Drawing.Size(0, 16);
+            this.InvalidPriceBox.TabIndex = 25;
+            this.InvalidPriceBox.Visible = false;
             // 
             // CustomerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.InvalidPriceBox);
+            this.Controls.Add(this.PriceToBox);
+            this.Controls.Add(this.PriceFromBox);
+            this.Controls.Add(this.SubmitSearchButton);
+            this.Controls.Add(this.ViewByDateButton);
+            this.Controls.Add(this.ViewByPriceButton);
             this.Controls.Add(this.PurchasesList);
-            this.Controls.Add(this.PriceRangeText);
             this.Controls.Add(this.ViewAllPurchasesButton);
             this.Controls.Add(this.SearchByDateCalendar);
             this.Controls.Add(this.OrderPlacedLabel);
@@ -314,7 +380,12 @@
         private System.Windows.Forms.Label OrderPlacedLabel;
         private System.Windows.Forms.MonthCalendar SearchByDateCalendar;
         private System.Windows.Forms.Button ViewAllPurchasesButton;
-        private System.Windows.Forms.TextBox PriceRangeText;
         private System.Windows.Forms.ListBox PurchasesList;
+        private System.Windows.Forms.Button ViewByPriceButton;
+        private System.Windows.Forms.Button ViewByDateButton;
+        private System.Windows.Forms.Button SubmitSearchButton;
+        private System.Windows.Forms.TextBox PriceFromBox;
+        private System.Windows.Forms.TextBox PriceToBox;
+        private System.Windows.Forms.Label InvalidPriceBox;
     }
 }

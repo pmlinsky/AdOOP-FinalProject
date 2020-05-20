@@ -15,16 +15,17 @@ namespace FinalProject
 {
     public partial class CustomerForm : Form
     {
-        List<int> qtyInStock = new List<int>();
-        List<string> items = new List<string>();
 
         LoginForm lf;
         SalesTrackerDBDataContext db;
+        CUSTOMER cust;
+
         public CustomerForm(LoginForm lf, SalesTrackerDBDataContext db)
         {
             InitializeComponent();
             this.lf = lf;
             this.db = db;
+            cust = db.CUSTOMERs.Where(c => c.Username.Equals(lf.UsernameText.Text)).First();
         }
 
         private void InventoryButton_Click(object sender, EventArgs e)
@@ -45,7 +46,6 @@ namespace FinalProject
                     {
                         InventoryList.Items.Add(item.ItemName +
                             "\t$" + item.Price);
-                        qtyInStock.Add(Convert.ToInt32(item.QtyInStock));
                     }
                 }                
             }
@@ -56,7 +56,6 @@ namespace FinalProject
         {
             ClearCurrent();
 
-            var cust = db.CUSTOMERs.Where(c => c.Username.Equals(lf.UsernameText.Text)).First();
             if (cust.Balance >= 1000)
             {
                 BalanceLabel.Text = "Your current balance is: $" + cust.Balance +
@@ -75,8 +74,13 @@ namespace FinalProject
 
         private void InventoryList_SelectedValueChanged(object sender, EventArgs e)
         {
-            SelectItemQty.Maximum = qtyInStock.ElementAt(
-                InventoryList.Items.IndexOf(InventoryList.SelectedItem));
+            int index = InventoryList.SelectedItem.ToString().IndexOf("\t");
+            var item = db.INVENTORies
+                .Where(i => i.ItemName
+                .Equals(InventoryList.SelectedItem.ToString().Substring(0, index)))
+                .First();
+
+            SelectItemQty.Maximum = item.QtyInStock;
             SelectItemQty.Value = 0;
         }
 
@@ -84,26 +88,17 @@ namespace FinalProject
         {
             decimal qty = SelectItemQty.Value;
             if (qty > 0) 
-            { 
-                items.Add(qty.ToString());
+            {
                 int index = InventoryList.SelectedItem.ToString().IndexOf("$");
-                items.Add(InventoryList.SelectedItem.ToString().Substring(0, index).Trim());
+                CheckoutList.Items.Add(qty + "\t" + 
+                    InventoryList.SelectedItem.ToString().Substring(0, index).Trim());
                 CheckoutButton.Visible = true;
             }
         }
 
         private void CheckoutButton_Click(object sender, EventArgs e)
         {
-            InventoryList.Visible = false;
-            for (int i = 0; i < items.Count; i += 2)
-            {
-                int qty = Convert.ToInt32(items.ElementAt(i));
-                string item = items.ElementAt(i + 1);
-                if (qty > 0)
-                {
-                    CheckoutList.Items.Add(qty.ToString() + "\t" + item);
-                }
-            }           
+            InventoryList.Visible = false;          
             CheckoutList.Visible = true;
             PlaceOrderButton.Visible = true;
             SelectItemLabel.Visible = false;
@@ -118,12 +113,12 @@ namespace FinalProject
 
             decimal totalPrice = 0;
             decimal linePrice = 0;
-            var cust = db.CUSTOMERs.Where(c => c.Username.Equals(lf.UsernameText.Text)).First();
 
-            for (int i = 0; i < items.Count; i += 2)
+            foreach (String s in CheckoutList.Items)
             {
-                int qty = Convert.ToInt32(items.ElementAt(i));
-                string item = items.ElementAt(i + 1);
+                int index = s.IndexOf("\t");
+                int qty = Convert.ToInt32(s.Substring(0, index));
+                string item = s.Substring(index+1);
 
                 var it = db.INVENTORies.Where(p => p.ItemName.Equals(item)).First();
                 it.QtyInStock -= qty;
@@ -137,24 +132,12 @@ namespace FinalProject
             }
             cust.Balance += totalPrice;
             db.SubmitChanges();
-
-            for (int i = items.Count - 1; i >= 0; i--)
-            {
-                items.RemoveAt(i);
-            }
-            for (int i = qtyInStock.Count - 1; i >= 0; i--)
-            {
-                qtyInStock.RemoveAt(i);
-            }
-            InventoryList.Items.Clear();
-            CheckoutList.Items.Clear();
         }
 
         private void BalanceButton_Click(object sender, EventArgs e)
         {
             ClearCurrent();
 
-            var cust = db.CUSTOMERs.Where(c => c.Username.Equals(lf.UsernameText.Text)).First();
             BalanceLabel.Text = "Your current balance is: $"+ cust.Balance +
                 "\nEnter payment amount below:";
 
@@ -174,8 +157,6 @@ namespace FinalProject
                 if (Convert.ToDouble(amount) > 0)
                 {
                     double payment = Convert.ToDouble(amount);
-                    var cust = db.CUSTOMERs.Where
-                        (c => c.Username.Equals(lf.UsernameText.Text)).First();
                     cust.Balance -= Convert.ToDecimal(amount);
 
                     db.SubmitChanges();
@@ -208,8 +189,6 @@ namespace FinalProject
         {
             ClearCurrent();
 
-            var cust = db.CUSTOMERs.Where(c => c.Username.Equals(lf.UsernameText.Text)).First();
-
             var purchases = cust.PURCHASEs.Select(c => c);
             foreach (var p in purchases)
             {
@@ -241,7 +220,6 @@ namespace FinalProject
 
         private void SubmitSearchButton_Click(object sender, EventArgs e)
         {
-            ClearCurrent();
 
             DateTime start, end;
             decimal low = 0, high = decimal.MaxValue;
@@ -281,12 +259,12 @@ namespace FinalProject
                 PriceFromBox.Text = "Enter Lowest Price Here";
                 PriceToBox.Text = "Enter Highest Price Here";
             }
-
-            var cust = db.CUSTOMERs.Where(c => c.Username.Equals(lf.UsernameText.Text)).First();
+            ClearCurrent();
 
             var purchases = cust.PURCHASEs.Where(
                 c => c.DateOfPurchase >= start && c.DateOfPurchase <= end &&
                 c.Price >= low && c.Price <= high);
+
             foreach (var p in purchases)
             {
                 PurchasesList.Items.Add(p.DateOfPurchase.ToShortDateString() + "\t" +
@@ -328,7 +306,5 @@ namespace FinalProject
             InvalidPriceBox.Visible = false;
             PurchasesList.Items.Clear();
         }
-
-
     }
 }

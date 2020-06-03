@@ -7,14 +7,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Data.SqlClient;
-using System.Data.Odbc;
 
 namespace FinalProject
 {
     public partial class LoginForm : Form
     {
-        SalesTrackerDBDataContext db;
+        readonly SalesTrackerDBDataContext db;
         public LoginForm()
         {
             InitializeComponent();
@@ -33,7 +31,7 @@ namespace FinalProject
             }
             else if (cust.Pswrd.Trim().Equals(password))
             {
-                CustomerForm cf = new CustomerForm(this, db);
+                CustomerForm cf = new CustomerForm(cust, db);
                 this.Hide();
                 cf.ShowDialog();
                 this.Close();

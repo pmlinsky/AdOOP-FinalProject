@@ -8,7 +8,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Data.Odbc;
 using System.Text.RegularExpressions;
 
 namespace FinalProject
@@ -16,16 +15,14 @@ namespace FinalProject
     public partial class CustomerForm : Form
     {
 
-        LoginForm lf;
-        SalesTrackerDBDataContext db;
-        CUSTOMER cust;
+        readonly SalesTrackerDBDataContext db;
+        readonly CUSTOMER cust;
 
-        public CustomerForm(LoginForm lf, SalesTrackerDBDataContext db)
+        public CustomerForm(CUSTOMER cust, SalesTrackerDBDataContext db)
         {
             InitializeComponent();
-            this.lf = lf;
+            this.cust = cust;
             this.db = db;
-            cust = db.CUSTOMERs.Where(c => c.Username.Equals(lf.UsernameText.Text)).First();
         }
 
         private void InventoryButton_Click(object sender, EventArgs e)
@@ -99,11 +96,13 @@ namespace FinalProject
         private void CheckoutButton_Click(object sender, EventArgs e)
         {
             InventoryList.Visible = false;          
-            CheckoutList.Visible = true;
-            PlaceOrderButton.Visible = true;
             SelectItemLabel.Visible = false;
             CartButton.Visible = false;
             SelectItemQty.Visible = false;
+            CheckoutButton.Visible = false;
+
+            CheckoutList.Visible = true;
+            PlaceOrderButton.Visible = true;
         }
 
         private void PlaceOrderButton_Click(object sender, EventArgs e)
@@ -154,10 +153,10 @@ namespace FinalProject
             Regex rg = new Regex(pattern);
             if (rg.IsMatch(amount))
             {
-                if (Convert.ToDouble(amount) > 0)
+                if (Convert.ToDecimal(amount) > 0)
                 {
-                    double payment = Convert.ToDouble(amount);
-                    cust.Balance -= Convert.ToDecimal(amount);
+                    decimal payment = Convert.ToDecimal(amount);
+                    cust.Balance -= payment;
 
                     db.SubmitChanges();
                     BalanceLabel.Text = "Thank you for your payment! Your current balance is: " +
@@ -221,8 +220,10 @@ namespace FinalProject
         private void SubmitSearchButton_Click(object sender, EventArgs e)
         {
 
-            DateTime start, end;
+            DateTime start = new DateTime(1800, 01, 01), end = DateTime.Today;
             decimal low = 0, high = decimal.MaxValue;
+            bool error = false;
+
             if (SearchByDateCalendar.Visible)
             {
                 start = SearchByDateCalendar.SelectionRange.Start;
@@ -245,21 +246,22 @@ namespace FinalProject
                     else
                     {
                         InvalidPriceBox.Text = "Invalid input. Displaying all purchases.";
-                        InvalidPriceBox.Visible = true;
+                        error = true;
                     }
                 }
                 else
                 {
                     InvalidPriceBox.Text = "Invalid input. Displaying all purchases.";
-                    InvalidPriceBox.Visible = true;
-                }
-                start = new DateTime(1800, 01, 01);
-                end = DateTime.Today;
-                
+                    error = true;
+                }               
                 PriceFromBox.Text = "Enter Lowest Price Here";
                 PriceToBox.Text = "Enter Highest Price Here";
             }
             ClearCurrent();
+            if (error)
+            {
+                InvalidPriceBox.Visible = true;
+            }
 
             var purchases = cust.PURCHASEs.Where(
                 c => c.DateOfPurchase >= start && c.DateOfPurchase <= end &&
